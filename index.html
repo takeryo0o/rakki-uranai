@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今日のラッキー占い</title>
+  <meta name="description" content="1日1回楽しめる、今日のラッキー度占いサイトです。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <p class="eyebrow">DAILY FORTUNE</p>
+      <h1>今日のラッキー占い</h1>
+      <p class="subtitle">名前を入力して、今日のラッキー度を占います。</p>
+      <p id="todayLabel" class="date-label"></p>
+    </header>
+
+    <section id="startCard" class="card start-card">
+      <div class="moon-icon" aria-hidden="true">☾</div>
+
+      <label for="nickname">名前</label>
+      <input
+        id="nickname"
+        type="text"
+        maxlength="30"
+        autocomplete="name"
+        placeholder="例：ジェバンニ"
+      >
+
+      <button id="fortuneButton" class="primary-button" type="button">
+        今日の運勢を占う
+      </button>
+
+      <p class="notice">このブラウザでは1日1回占えます。</p>
+    </section>
+
+    <section id="resultCard" class="card result-card hidden" aria-live="polite">
+      <p class="result-label">TODAY'S LUCK</p>
+      <h2 id="resultTitle">今日のラッキー度</h2>
+
+      <div class="score-ring">
+        <span id="luckyScore">0</span>
+        <small>/ 100</small>
+      </div>
+
+      <p id="rankText" class="rank-text"></p>
+      <p id="messageText" class="message-text"></p>
+
+      <div class="meter" aria-label="ラッキー度">
+        <div id="meterBar" class="meter-bar"></div>
+      </div>
+
+      <div class="lucky-grid">
+        <article class="lucky-item">
+          <small>ラッキーアイテム</small>
+          <strong id="luckyItem"></strong>
+        </article>
+        <article class="lucky-item">
+          <small>ラッキーカラー</small>
+          <strong id="luckyColor"></strong>
+        </article>
+        <article class="lucky-item">
+          <small>ラッキーナンバー</small>
+          <strong id="luckyNumber"></strong>
+        </article>
+        <article class="lucky-item">
+          <small>ラッキータイム</small>
+          <strong id="luckyTime"></strong>
+        </article>
+      </div>
+
+      <div class="advice-box">
+        <h3>今日のひとこと</h3>
+        <p id="adviceText"></p>
+      </div>
+    </section>
+
+    <footer>
+      <p>占いは日々を楽しむためのヒントとしてお楽しみください。</p>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

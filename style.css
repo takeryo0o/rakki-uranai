@@ -1,0 +1,255 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-top: #17152d;
+  --bg-bottom: #30265a;
+  --card: rgba(255, 255, 255, 0.1);
+  --card-border: rgba(255, 255, 255, 0.18);
+  --text: #ffffff;
+  --muted: #cbc7df;
+  --accent: #ffd978;
+  --accent-deep: #f3a952;
+  --purple: #bba7ff;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Yu Gothic UI", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top, rgba(126, 98, 213, 0.45), transparent 36%),
+    linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+}
+
+.container {
+  width: min(680px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 56px 0 32px;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.eyebrow,
+.result-label {
+  color: var(--accent);
+  letter-spacing: 0.22em;
+  font-size: 0.76rem;
+  font-weight: 800;
+  margin: 0 0 10px;
+}
+
+h1 {
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  line-height: 1.1;
+  margin: 0;
+}
+
+.subtitle,
+.notice,
+.message-text {
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.date-label {
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.card {
+  padding: clamp(24px, 6vw, 40px);
+  border: 1px solid var(--card-border);
+  border-radius: 28px;
+  background: var(--card);
+  box-shadow: 0 24px 70px rgba(5, 4, 20, 0.34);
+  backdrop-filter: blur(18px);
+}
+
+.start-card,
+.result-card {
+  text-align: center;
+}
+
+.moon-icon {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 2.3rem;
+  color: var(--accent);
+  background: rgba(255, 217, 120, 0.1);
+  border: 1px solid rgba(255, 217, 120, 0.25);
+}
+
+label {
+  display: block;
+  margin: 0 0 8px;
+  text-align: left;
+  color: #eeeaff;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  padding: 15px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 14px;
+  font: inherit;
+  color: var(--text);
+  background: rgba(10, 8, 30, 0.42);
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(255, 217, 120, 0.1);
+}
+
+button {
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.primary-button {
+  width: 100%;
+  margin-top: 22px;
+  padding: 18px 20px;
+  color: #271f3f;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  box-shadow: 0 12px 30px rgba(243, 169, 82, 0.24);
+}
+
+.notice {
+  margin: 14px 0 0;
+  font-size: 0.79rem;
+}
+
+.hidden {
+  display: none;
+}
+
+h2 {
+  margin: 8px 0 24px;
+}
+
+.score-ring {
+  width: 155px;
+  height: 155px;
+  margin: 0 auto 22px;
+  display: grid;
+  place-content: center;
+  border-radius: 50%;
+  border: 9px solid rgba(255, 217, 120, 0.2);
+  outline: 2px solid rgba(255, 217, 120, 0.48);
+  color: var(--accent);
+}
+
+.score-ring span {
+  font-size: 3.2rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.score-ring small {
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+.rank-text {
+  color: var(--accent);
+  font-size: 1.35rem;
+  font-weight: 900;
+  margin: 0 0 8px;
+}
+
+.message-text {
+  margin: 0 auto 22px;
+  max-width: 500px;
+}
+
+.meter {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.meter-bar {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8b7cf6, var(--accent));
+  transition: width 1s ease;
+}
+
+.lucky-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.lucky-item {
+  padding: 18px;
+  text-align: left;
+  border-radius: 18px;
+  background: rgba(10, 8, 30, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.lucky-item small {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+.lucky-item strong {
+  font-size: 1.05rem;
+}
+
+.advice-box {
+  margin-top: 24px;
+  padding: 20px;
+  text-align: left;
+  border-left: 4px solid var(--accent);
+  border-radius: 12px;
+  background: rgba(255, 217, 120, 0.08);
+}
+
+.advice-box h3 {
+  margin: 0 0 8px;
+  color: var(--accent);
+}
+
+.advice-box p {
+  margin: 0;
+  line-height: 1.8;
+}
+
+footer {
+  padding-top: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 560px) {
+  .container {
+    padding-top: 36px;
+  }
+
+  .lucky-grid {
+    grid-template-columns: 1fr;
+  }
+}
