@@ -503,6 +503,7 @@ const startCard = document.getElementById("startCard");
 const resultCard = document.getElementById("resultCard");
 const nicknameInput = document.getElementById("nickname");
 const fortuneButton = document.getElementById("fortuneButton");
+const retryFortuneButton = document.getElementById("retryFortuneButton");
 
 function getLocalDateKey() {
   const now = new Date();
@@ -611,6 +612,15 @@ fortuneButton.addEventListener("click", () => {
 
 nicknameInput.addEventListener("input", () => {
   nicknameInput.setCustomValidity("");
+});
+retryFortuneButton.addEventListener("click", () => {
+  // 結果表示中に「占い」を押した場合だけ再占い可能にする
+  if (resultCard.classList.contains("hidden")) {
+    return;
+  }
+
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
 });
 
 setTodayLabel();
