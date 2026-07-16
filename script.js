@@ -904,6 +904,8 @@ const nicknameInput = document.getElementById("nickname");
 const fortuneButton = document.getElementById("fortuneButton");
 const retryFortuneButton = document.getElementById("retryFortuneButton");
 
+const RESULT_OFFSET = 1;
+
 /**
  * 日本時間の日付を「2026-07-16」の形式で取得する
  */
@@ -1073,8 +1075,8 @@ function createFortune(nickname) {
    * 例：
    * 山田|2026-07-16|daily-fortune-v2
    */
-  const baseKey =
-    `${normalizedNickname}|${dateKey}|daily-fortune-v2`;
+const baseKey =
+  `${normalizedNickname}|${dateKey}|daily-fortune-v2|${RESULT_OFFSET}`;
 
   /*
    * 名前に「遠藤」が含まれているか確認
