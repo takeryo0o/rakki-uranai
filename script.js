@@ -594,7 +594,8 @@ const messages = [
   "今日は自分の名前を呼ばれた気がして、三回くらい振り向きそうです。",
   "片づけた直後に、また同じ場所が散らかりそうです。",
   "最後の一個を取ったら、なぜか責任を感じそうです。",
-  "なにもしてないのに、いろいろ壊れそうです。"
+  "なにもしてないのに、いろいろ壊れそうです。",
+  "座布団をぜんぶ取られた気持ちになりそうです。"
 ];
 const adviceList = [
   "朝いちばんに机の上を整えると気持ちの流れが整い、良い判断につながりそうです。",
@@ -904,7 +905,7 @@ const nicknameInput = document.getElementById("nickname");
 const fortuneButton = document.getElementById("fortuneButton");
 const retryFortuneButton = document.getElementById("retryFortuneButton");
 
-const RESULT_OFFSET = 1;
+const RESULT_OFFSET = 20;
 
 /**
  * 日本時間の日付を「2026-07-16」の形式で取得する
