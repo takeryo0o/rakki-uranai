@@ -1,4 +1,4 @@
-const STORAGE_KEY = "dailyFortuneNamed200V1";
+const STORAGE_KEY = "dailyFortuneNamed200V3";
 
 const items = [
   "小さなノート",
