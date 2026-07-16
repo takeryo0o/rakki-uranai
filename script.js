@@ -898,93 +898,338 @@ const adviceList = [
   "最後まで頑張れなくても、途中まで頑張った顔で締めくくりましょう。",
   "今日は自分の限界を知り、知らなかったことにして進みましょう。"
 ];
-
 const startCard = document.getElementById("startCard");
 const resultCard = document.getElementById("resultCard");
 const nicknameInput = document.getElementById("nickname");
 const fortuneButton = document.getElementById("fortuneButton");
 const retryFortuneButton = document.getElementById("retryFortuneButton");
 
+/**
+ * 日本時間の日付を「2026-07-16」の形式で取得する
+ */
 function getLocalDateKey() {
-  const now = new Date();
-  return [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0")
-  ].join("-");
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(
+    parts.map(part => [part.type, part.value])
+  );
+
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
+/**
+ * 画面上部に日本時間の日付を表示する
+ */
 function setTodayLabel() {
   const formatter = new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
     year: "numeric",
     month: "long",
     day: "numeric",
     weekday: "long"
   });
-  document.getElementById("todayLabel").textContent = formatter.format(new Date());
+
+  document.getElementById("todayLabel").textContent =
+    formatter.format(new Date());
 }
 
+/**
+ * ラッキー度に応じたランクを返す
+ */
 function getRank(score) {
   if (score >= 95) return "奇跡級の大吉";
   if (score >= 85) return "きらめく大吉";
   if (score >= 70) return "軽やかな吉";
   if (score >= 55) return "穏やかな中吉";
   if (score >= 40) return "準備の日";
+
   return "慎重に進む日";
 }
 
-function randomItem(array) {
-  return array[Math.floor(Math.random() * array.length)];
+/**
+ * 名前の全角・半角などを揃え、空白を削除する
+ *
+ * 例：
+ * 「 山田　太郎 」→「山田太郎」
+ */
+function normalizeNickname(nickname) {
+  return nickname
+    .normalize("NFKC")
+    .replace(/\s+/g, "");
 }
 
-function createFortune(nickname) {
-  // 「遠藤」という文字を含む名前は、80％の確率で1～20になります。
-  // 例：「遠藤」「遠藤さん」「山田遠藤」など。
-  const containsEndo = nickname.includes("遠藤");
-  const isVeryUnlucky = containsEndo && Math.random() < 0.75;
+/**
+ * 文字列を固定の数値へ変換する
+ */
+function hashString(text) {
+  let hash = 2166136261;
 
-  const luckyScore = isVeryUnlucky
-    ? Math.floor(Math.random() * 20) + 1
-    : Math.floor(Math.random() * 96) + 5;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
 
-  return {
-    dateKey: getLocalDateKey(),
-    nickname,
-    luckyScore,
-    rank: getRank(luckyScore),
-    message: randomItem(messages),
-    item: randomItem(items),
-    color: randomItem(colors),
-    number: Math.floor(Math.random() * 99) + 1,
-    time: randomItem(times),
-    advice: randomItem(adviceList)
+  return hash >>> 0;
+}
+
+/**
+ * 同じ数値から、毎回同じ乱数を返す関数を作る
+ */
+function createSeededRandom(seed) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6D2B79F5) | 0;
+
+    let value = seed;
+
+    value = Math.imul(
+      value ^ (value >>> 15),
+      value | 1
+    );
+
+    value ^= value + Math.imul(
+      value ^ (value >>> 7),
+      value | 61
+    );
+
+    return (
+      (value ^ (value >>> 14)) >>> 0
+    ) / 4294967296;
   };
 }
 
+/**
+ * 名前・日付・項目名から、
+ * 0以上1未満の固定乱数を作る
+ */
+function getSeededValue(baseKey, category) {
+  const seed = hashString(
+    `${baseKey}|${category}`
+  );
+
+  const random = createSeededRandom(seed);
+
+  return random();
+}
+
+/**
+ * 指定した範囲内の固定整数を作る
+ *
+ * 例：
+ * 1～100
+ */
+function getSeededInteger(
+  baseKey,
+  category,
+  min,
+  max
+) {
+  const value = getSeededValue(
+    baseKey,
+    category
+  );
+
+  return Math.floor(
+    value * (max - min + 1)
+  ) + min;
+}
+
+/**
+ * 配列から固定の1項目を選ぶ
+ */
+function getSeededItem(
+  array,
+  baseKey,
+  category
+) {
+  const index = getSeededInteger(
+    baseKey,
+    category,
+    0,
+    array.length - 1
+  );
+
+  return array[index];
+}
+
+/**
+ * 名前と日付から占い結果を作る
+ */
+function createFortune(nickname) {
+  const dateKey = getLocalDateKey();
+
+  const normalizedNickname =
+    normalizeNickname(nickname);
+
+  /*
+   * 名前＋日付を組み合わせて、
+   * 占い結果の基準となる文字列を作る
+   *
+   * 例：
+   * 山田|2026-07-16|daily-fortune-v2
+   */
+  const baseKey =
+    `${normalizedNickname}|${dateKey}|daily-fortune-v2`;
+
+  /*
+   * 名前に「遠藤」が含まれているか確認
+   *
+   * 対象例：
+   * 遠藤
+   * 遠藤さん
+   * 山田遠藤
+   * 遠藤太郎
+   */
+  const containsEndo =
+    normalizedNickname.includes("遠藤");
+
+  /*
+   * 「遠藤」を含む名前は、
+   * 固定判定で75％の確率で低い結果になる
+   *
+   * 固定判定なので、
+   * 同じ日・同じ名前なら毎回同じ判定になる
+   */
+  const isVeryUnlucky =
+    containsEndo &&
+    getSeededValue(
+      baseKey,
+      "endo-unlucky-check"
+    ) < 0.75;
+
+  /*
+   * 遠藤の低運勢判定に該当した場合：1～20
+   * 通常の場合：5～100
+   */
+  const luckyScore = isVeryUnlucky
+    ? getSeededInteger(
+        baseKey,
+        "low-score",
+        1,
+        20
+      )
+    : getSeededInteger(
+        baseKey,
+        "normal-score",
+        5,
+        100
+      );
+
+  return {
+    dateKey,
+    nickname,
+    luckyScore,
+    rank: getRank(luckyScore),
+
+    message: getSeededItem(
+      messages,
+      baseKey,
+      "message"
+    ),
+
+    item: getSeededItem(
+      items,
+      baseKey,
+      "item"
+    ),
+
+    color: getSeededItem(
+      colors,
+      baseKey,
+      "color"
+    ),
+
+    number: getSeededInteger(
+      baseKey,
+      "number",
+      1,
+      99
+    ),
+
+    time: getSeededItem(
+      times,
+      baseKey,
+      "time"
+    ),
+
+    advice: getSeededItem(
+      adviceList,
+      baseKey,
+      "advice"
+    )
+  };
+}
+
+/**
+ * 占い結果を画面へ表示する
+ */
 function renderFortune(result) {
   startCard.classList.add("hidden");
   resultCard.classList.remove("hidden");
 
-  document.getElementById("resultTitle").textContent =
+  document.getElementById(
+    "resultTitle"
+  ).textContent =
     `${result.nickname}さんの今日のラッキー度`;
-  document.getElementById("luckyScore").textContent = result.luckyScore;
-  document.getElementById("rankText").textContent = result.rank;
-  document.getElementById("messageText").textContent = result.message;
-  document.getElementById("luckyItem").textContent = result.item;
-  document.getElementById("luckyColor").textContent = result.color;
-  document.getElementById("luckyNumber").textContent = result.number;
-  document.getElementById("luckyTime").textContent = result.time;
-  document.getElementById("adviceText").textContent = result.advice;
+
+  document.getElementById(
+    "luckyScore"
+  ).textContent = result.luckyScore;
+
+  document.getElementById(
+    "rankText"
+  ).textContent = result.rank;
+
+  document.getElementById(
+    "messageText"
+  ).textContent = result.message;
+
+  document.getElementById(
+    "luckyItem"
+  ).textContent = result.item;
+
+  document.getElementById(
+    "luckyColor"
+  ).textContent = result.color;
+
+  document.getElementById(
+    "luckyNumber"
+  ).textContent = result.number;
+
+  document.getElementById(
+    "luckyTime"
+  ).textContent = result.time;
+
+  document.getElementById(
+    "adviceText"
+  ).textContent = result.advice;
 
   requestAnimationFrame(() => {
-    document.getElementById("meterBar").style.width = `${result.luckyScore}%`;
+    document.getElementById(
+      "meterBar"
+    ).style.width =
+      `${result.luckyScore}%`;
   });
 }
 
+/**
+ * 当日の保存済み結果を読み込む
+ */
 function loadSavedFortune() {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (saved && saved.dateKey === getLocalDateKey()) {
+    const saved = JSON.parse(
+      localStorage.getItem(STORAGE_KEY)
+    );
+
+    if (
+      saved &&
+      saved.dateKey === getLocalDateKey()
+    ) {
       renderFortune(saved);
     } else {
       localStorage.removeItem(STORAGE_KEY);
@@ -994,34 +1239,74 @@ function loadSavedFortune() {
   }
 }
 
-fortuneButton.addEventListener("click", () => {
-  const nickname = nicknameInput.value.trim();
+/**
+ * 「今日の運勢を占う」ボタン
+ */
+fortuneButton.addEventListener(
+  "click",
+  () => {
+    const nickname =
+      nicknameInput.value.trim();
 
-  if (!nickname) {
-    nicknameInput.focus();
-    nicknameInput.setCustomValidity("名前を入力してください。");
-    nicknameInput.reportValidity();
-    return;
+    if (!nickname) {
+      nicknameInput.focus();
+
+      nicknameInput.setCustomValidity(
+        "名前を入力してください。"
+      );
+
+      nicknameInput.reportValidity();
+
+      return;
+    }
+
+    nicknameInput.setCustomValidity("");
+
+    const result =
+      createFortune(nickname);
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(result)
+    );
+
+    renderFortune(result);
   }
+);
 
-  nicknameInput.setCustomValidity("");
-  const result = createFortune(nickname);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
-  renderFortune(result);
-});
-
-nicknameInput.addEventListener("input", () => {
-  nicknameInput.setCustomValidity("");
-});
-retryFortuneButton.addEventListener("click", () => {
-  // 結果表示中に「占い」を押した場合だけ再占い可能にする
-  if (resultCard.classList.contains("hidden")) {
-    return;
+/**
+ * 名前を入力し始めたら
+ * 入力エラー表示を解除する
+ */
+nicknameInput.addEventListener(
+  "input",
+  () => {
+    nicknameInput.setCustomValidity("");
   }
+);
 
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
-});
+/**
+ * 結果画面下部の「占い」を押すと、
+ * 保存結果を削除して名前入力画面へ戻す
+ *
+ * 同じ日・同じ名前を再入力した場合は、
+ * 固定計算なので同じ結果になる
+ */
+if (retryFortuneButton) {
+  retryFortuneButton.addEventListener(
+    "click",
+    () => {
+      if (
+        resultCard.classList.contains("hidden")
+      ) {
+        return;
+      }
+
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
+  );
+}
 
 setTodayLabel();
 loadSavedFortune();
