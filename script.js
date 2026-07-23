@@ -1105,7 +1105,81 @@ const nicknameInput = document.getElementById("nickname");
 const fortuneButton = document.getElementById("fortuneButton");
 const retryFortuneButton = document.getElementById("retryFortuneButton");
 
+const shareResultButton =
+  document.getElementById("shareResultButton");
+
+const shareStatus =
+  document.getElementById("shareStatus");
+
 const RESULT_OFFSET = 20;
+
+async function copyShareText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+
+    shareStatus.textContent =
+      "結果をコピーしました。SNSへ貼り付けてください。";
+  } catch {
+    shareStatus.textContent =
+      "コピーできませんでした。";
+  }
+}
+
+if (shareResultButton) {
+  shareResultButton.addEventListener(
+    "click",
+    async () => {
+      const savedText =
+        localStorage.getItem(STORAGE_KEY);
+
+      if (!savedText) {
+        shareStatus.textContent =
+          "共有できる占い結果がありません。";
+        return;
+      }
+
+      const result = JSON.parse(savedText);
+
+      const shareText =
+`【今日のラッキー占い】
+${result.nickname}さんのラッキー度：${result.luckyScore}/100
+${result.rank}
+
+ラッキーアイテム：${result.item}
+ラッキーカラー：${result.color}
+ラッキーナンバー：${result.number}
+
+${result.message}
+
+#今日のラッキー占い`;
+
+      const shareData = {
+        title: "今日のラッキー占い",
+        text: shareText,
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+
+          shareStatus.textContent =
+            "共有画面を開きました。";
+        } catch (error) {
+          if (error.name !== "AbortError") {
+            await copyShareText(
+              `${shareText}\n${window.location.href}`
+            );
+          }
+        }
+      } else {
+        await copyShareText(
+          `${shareText}\n${window.location.href}`
+        );
+      }
+    }
+  );
+}
 
 /**
  * 日本時間の日付を「2026-07-16」の形式で取得する
