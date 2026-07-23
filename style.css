@@ -267,3 +267,30 @@ footer {
 .secret-retry-button:hover {
   text-decoration: underline;
 }
+.share-area {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.share-button {
+  width: 100%;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #bba7ff, #ffd978);
+  color: #271f3f;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.share-button:hover {
+  transform: translateY(-2px);
+}
+
+#shareStatus {
+  min-height: 1.5em;
+  margin: 10px 0 0;
+  color: #cbc7df;
+  font-size: 0.85rem;
+}
